@@ -1,0 +1,42 @@
+
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Edit</ion-title>
+    
+    <ion-buttons end>  
+      <button ion-button icon-only color='danger' (click)='closeModal()'>
+      <ion-icon name='close-circle'></ion-icon>
+    </button>
+    </ion-buttons> 
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+  <ion-card>
+    <ion-card-header>
+      <strong>{{user.displayName}}</strong>
+    </ion-card-header>
+    <ion-card-content>
+       <img src="{{user.photoUrl}}" alt="" (click)='changeUserPic()'>
+      <ion-list>
+        <ion-item>
+          <ion-label>Username</ion-label>
+          <ion-input type='text' [(ngModel)]='displayName' value='{{user.displayName}}'></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>email</ion-label>
+          <ion-input type='text' value='{{user.email}}'></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>nrOfPic</ion-label>
+          <ion-input type='text' value='{{user.nrOfPic}}' readonly></ion-input>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

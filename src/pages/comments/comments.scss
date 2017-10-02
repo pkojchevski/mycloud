@@ -1,0 +1,90 @@
+page-comments {
+    img {
+    display:block;
+       margin:auto;
+    }
+
+    .bottom-fixed {
+        position:absolute;
+        right:0;
+        bottom:0;
+    }
+
+    .bubble{
+        background-color: #F2F2F2;
+        border-radius: 5px;
+        box-shadow: 0 0 6px #B2B2B2;
+        display: inline-block;
+        padding: 10px 18px;
+        position: relative;
+        vertical-align: top;
+    }
+    
+    .bubble::before {
+        background-color: #F2F2F2;
+        content: "\00a0";
+        display: block;
+        height: 16px;
+        position: absolute;
+        top: 11px;
+        transform:             rotate( 29deg ) skew( -35deg );
+            -moz-transform:    rotate( 29deg ) skew( -35deg );
+            -ms-transform:     rotate( 29deg ) skew( -35deg );
+            -o-transform:      rotate( 29deg ) skew( -35deg );
+            -webkit-transform: rotate( 29deg ) skew( -35deg );
+        width:  20px;
+    }
+    
+    .me {
+        float: left;   
+        margin: 5px 45px 5px 20px; 
+        background:#FFD700;         
+    }
+    
+    .me::before {
+        box-shadow: -2px 2px 2px 0 rgba( 178, 178, 178, .4 );
+        left: -9px;     
+        background:#FFD700;      
+    }
+    
+    .you {
+        float: right;    
+        margin: 5px 20px 5px 45px;         
+        background: #7FFFD4;
+    }
+
+    .you::before {
+        box-shadow: 2px -2px 2px 0 rgba( 178, 178, 178, .4 );
+        right: -9px;    
+        background: #7FFFD4;
+    }
+
+    .image {
+        position: relative;
+        width:100%;
+    }
+
+    .h4 {
+        position: absolute;
+        width:100%;
+    }
+
+    span {
+        color: white;
+        //font:bold 24px/45px Helvetica, Sans-Serif;
+        // letter-spacing:-1px;
+        //background:rgb(0,0,0);
+        background: rgba(0,0,0,0.7);
+        padding:5px;
+        font-size:14px;
+        font-style:italic;
+        border-radius:5px;
+    }
+
+    .date {
+        position: absolute;
+        top:0;
+        right:20px;
+        font-size: 10px;
+    }
+}

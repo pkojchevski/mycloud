@@ -1,0 +1,59 @@
+
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Comments</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <div class="image">
+    <img src='{{img?.imgUrl}}'>
+    <h4><span>{{img?.title}}</span></h4>
+    <strong class = 'date'><span>{{img?.createdAt}}</span></strong>
+  </div>
+
+  <ion-list no-lines *ngFor='let c of comments'>
+      <ion-item text-wrap >
+         <ion-avatar item-left *ngIf='c.side'>
+            <img src="{{c?.userPhoto}}">
+         </ion-avatar>
+         <div class='bubble me' *ngIf='c.side'>
+          <h2>{{c?.displayName}}</h2>
+          <p>{{c?.comment}}</p>
+          <p>{{c?.createdAt}}</p>
+         </div>
+
+         <ion-avatar item-right *ngIf='!c.side'>
+            <img src="{{c?.userPhoto}}">
+         </ion-avatar>
+         <div class='bubble you' *ngIf='!c.side'>
+          <h2>{{c?.displayName}}</h2>
+          <p>{{c?.comment}}</p>
+          <p>{{c?.createdAt}}</p>
+         </div>
+      </ion-item>
+
+  </ion-list>
+
+ 
+
+</ion-content>
+
+<ion-footer>
+  <ion-grid>
+      <ion-row>
+        <ion-col col-10>
+          <ion-input placeholder='comment...' [(ngModel)]='comment'></ion-input>
+        </ion-col>
+        <ion-col col-2>
+          <button ion-button icon-only clear (tap)='addComment()'>
+          <ion-icon name='add-circle'></ion-icon>
+          </button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-footer>
+

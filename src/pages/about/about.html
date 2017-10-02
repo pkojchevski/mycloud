@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      <ion-row>
+        <ion-col col-4>
+          <img src='assets/img/mycloud.png' style='width:60%'>
+        </ion-col>
+        <ion-col style='align-self: center;' col-4>
+            Images
+        </ion-col>
+      </ion-row>
+    </ion-title>
+  <ion-buttons end>
+    <button ion-button icon-only (click)='logout()'>
+      <ion-icon name="log-out"></ion-icon>
+    </button>
+  </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+<ion-list>
+    <ion-item-sliding  *ngFor='let img of images'>
+    <ion-item>
+      <ion-thumbnail item-start>
+        <ion-badge *ngIf='(newCommentId == img?.picuid)' color='danger'>N</ion-badge>
+        <img src="{{img?.imgUrl}}" #imageToView (tap)="onClick(imageToView)">
+      </ion-thumbnail>
+        <h2>{{img?.displayName}}</h2>
+        <h4>{{img?.createdAt}}</h4>
+        <h4>{{img?.title}}</h4>
+        <h4>{{img?.place}}</h4>
+    </ion-item>
+    <ion-item-options side="right">
+      <button ion-button icon-only color='primary' (tap)='commentImg(img)'>
+        <ion-icon name='chatbubbles'></ion-icon>
+      </button>
+      <!-- <button ion-button icon-only color="danger" (click)='viewImg(img)'>
+          <ion-icon name="search"></ion-icon>
+      </button> -->
+    </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+</ion-content>
+    

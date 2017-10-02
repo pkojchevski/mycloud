@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "566986544653",
+    "firebase_url": "https://oil-chat.firebaseio.com",
+    "project_id": "oil-chat",
+    "storage_bucket": "oil-chat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:566986544653:android:984faa488f49098d",
+        "android_client_info": {
+          "package_name": "io.ionic.mycloud"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "566986544653-5kktv9i0i7omkpgnhvi48siu03bpp564.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.ionic.mycloud",
+            "certificate_hash": "996077c6a4846c7a0bb49a4255a5515abe4e28b8"
+          }
+        },
+        {
+          "client_id": "566986544653-jjekvnfakr339ttmonbcbjgkhcgutnau.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTqiUmvbhZ6i-ye8zpJHqz8bK2__4uipw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "566986544653-jjekvnfakr339ttmonbcbjgkhcgutnau.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

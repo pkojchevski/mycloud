@@ -1,0 +1,24 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Add User Picture</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <div class='profile-image'>
+      <img src='{{imgUrl}}' class='userImage' (tap)='changeUserImg()'>
+    </div>
+    <div text-center>
+      <button ion-button round outline (tap)='chooseimage()'>Choose Image</button>
+    </div>
+    <div [hidden]='!moveon' text-center>
+      <button ion-button round outline (tap)='proceed()'>Skip this step</button>
+    </div>
+    <div [hidden]='moveon' text-center>
+      <button ion-button round outline (tap)='updateproceed()'>Upload & proceed</button>
+    </div>
+
+</ion-content>

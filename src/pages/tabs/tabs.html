@@ -1,0 +1,5 @@
+<ion-tabs (ionChange)="tabSelected($event)">
+  <ion-tab [root]="tab1Root" tabIcon="home"></ion-tab>
+  <ion-tab [root]="tab2Root" [rootParams]='notificationData' tabIcon="images" [tabBadge]="imagesCount" tabBadgeStyle="danger"></ion-tab>
+  <ion-tab [root]="tab3Root" tabIcon="contacts" [tabBadge]="usersCount" tabBadgeStyle="danger"></ion-tab>
+</ion-tabs>
