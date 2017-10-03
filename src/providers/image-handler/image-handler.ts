@@ -83,7 +83,7 @@ addPicInStorage(imgStr) {
 
 addPicUrlInDatabase(place, comment, imgUrl, user, storageuid) {
    var promise = new Promise((resolve, reject) => {
-     console.log('addPicUrlInDatabase');
+     //console.log('addPicUrlInDatabase');
      let d = new Date();
      let newImgKey = firebase.database().ref('/images').push().key;
       firebase.database().ref('/images').
@@ -112,7 +112,7 @@ addPicUrlInDatabase(place, comment, imgUrl, user, storageuid) {
       })
       .catch((err) => {
         reject(err);
-        console.log('err:'+JSON.stringify(err));
+        //console.log('err:'+JSON.stringify(err));
       })
       })
    return promise;
@@ -198,13 +198,13 @@ getImagesOfCurrentUser() {
 }
 
 deleteImageFromStorage(img) {
-  console.log('deleteimagefromstorage');
+  //console.log('deleteimagefromstorage');
   var promise = new Promise((resolve, reject) => {
     this.firestore.ref().child('/images/'+img.storageuid).delete().then(() => {
     this.deleteImageFromDatabase(img);
     resolve(true);
   }).catch(err => {
-    console.log('err:'+JSON.stringify(err));
+    //console.log('err:'+JSON.stringify(err));
     reject(err);
   })
 })
@@ -212,13 +212,13 @@ return promise;
 }
 
 deleteImageFromDatabase(img) {
-  console.log('deleteimagesfromdatabase');
+  //console.log('deleteimagesfromdatabase');
  var promise = new Promise((resolve, reject) => {
     firebase.database().ref('images/').orderByChild('imgUrl').equalTo(img.imgUrl)
        .on('child_added', (snap) => {
        snap.ref.remove().then(() => {
         this.decrNrOfPic().then(() => {
-          console.log('were here');
+        //  console.log('were here');
          resolve(true);
         })
         .catch((err) => {
@@ -235,7 +235,7 @@ deleteImageFromDatabase(img) {
 }
 
 getnrOfPic() {
-  console.log('getnrOfPic');
+  //console.log('getnrOfPic');
     var promise = new Promise((resolve, reject) => {
     firebase.database().ref('/userProfile').child(firebase.auth().currentUser.uid).
       on('value', (snap) => {
@@ -248,7 +248,7 @@ getnrOfPic() {
 }
 
 incrNrOfPic() {
-  console.log('incnrOfPic');
+ // console.log('incnrOfPic');
    return new Promise((resolve, reject) => {
     this.getnrOfPic().then((res) => {
       firebase.database().ref('/userProfile').child(firebase.auth().currentUser.uid).update({
@@ -260,14 +260,14 @@ incrNrOfPic() {
          reject(err);
        })
    }).catch((err) => {
-      console.log('err:'+err);
+      //console.log('err:'+err);
       reject(err);
    }) 
    }) 
 }
 
 decrNrOfPic() {
-  console.log('decnrOfPic');
+  //console.log('decnrOfPic');
   return new Promise((resolve, reject) => {
     this.getnrOfPic().then((res) => {
        firebase.database().ref('/userProfile').child(firebase.auth().currentUser.uid).update({
@@ -275,14 +275,14 @@ decrNrOfPic() {
        })
        resolve(true);
     }).catch((err) => {
-       console.log('err:'+err);
+    //   console.log('err:'+err);
        reject(err);
     })
   })
 }
 
 reverseString(str) {
-  console.log('str:'+str);
+  //console.log('str:'+str);
     // Step 1. Use the split() method to return a new array
     var splitString = str.split(""); // var splitString = "hello".split("");
     // ["h", "e", "l", "l", "o"]

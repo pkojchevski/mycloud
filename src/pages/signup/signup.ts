@@ -41,7 +41,7 @@ export class SignupPage {
         this.navCtrl.push('AddUserPicPage');
       })
     .catch((err) => {
-        console.log('error:'+err);
+        //console.log('error:'+err);
           let alert = this.alertCtrl.create({
             title: 'Error!',
             subTitle: err.message,

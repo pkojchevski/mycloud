@@ -107,7 +107,7 @@ googleLogin() {
                   resolve(true);
                 })
                  .catch(err => {
-                   console.log('err:'+err);
+                   //console.log('err:'+err);
                    reject(err);
               })
               }   
@@ -133,7 +133,7 @@ getUserByEmail(email) {
       for(var key in data) {
         if(key === 'email') {
           if(data[key] === email) {
-            console.log('data[key]:'+data[key]);
+            ////console.log('data[key]:'+data[key]);
             resolve({'success':true});
           }
       }
@@ -157,7 +157,7 @@ updateDisplayName(name: string) {
 
 
 checkDuplicateDisplayName(name) {
-  console.log('checkDuplicateDisplayName');
+  //console.log('checkDuplicateDisplayName');
   return new Promise((resolve, reject) => {
     firebase.database().ref('/userProfile').orderByChild('displayName').equalTo(name)
       .once('value', (snap) => {

@@ -45,12 +45,12 @@ ionViewDidLoad() {
 })
 }
   ionViewWillEnter() {
-    console.log('ionViewWillEnter');
+    //console.log('ionViewWillEnter');
     this.firebaseplugin.onNotificationOpen().subscribe((data) => {
-      console.log('notification data:'+JSON.stringify(data));
+      //console.log('notification data:'+JSON.stringify(data));
       this.notificationData.data = data;
         if(data.tap) {
-          console.log('data:'+JSON.stringify(data));
+          //console.log('data:'+JSON.stringify(data));
         }
           if(data.sendername === 'images') {
             this.imagesCount++;

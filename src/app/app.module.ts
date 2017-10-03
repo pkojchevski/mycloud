@@ -26,7 +26,7 @@ import { GooglePlus } from '@ionic-native/google-plus';
 import { config } from './app.firebaseconfig';
 
 import firebase from 'firebase';
-import { EditUserModalPage } from "../pages/edit-user-modal/edit-user-modal";
+
 import { CommentsProvider } from '../providers/comments/comments';
 
 import { AngularFireDatabaseModule, AngularFireDatabase } from 'angularfire2/database';
@@ -52,8 +52,7 @@ class CameraMock extends Camera {
     AboutPage,
     ContactPage,
     HomePage,
-    TabsPage,
-    EditUserModalPage
+    TabsPage
   ],
   imports: [
     BrowserModule,
@@ -67,8 +66,7 @@ class CameraMock extends Camera {
     AboutPage,
     ContactPage,
     HomePage,
-    TabsPage,
-    EditUserModalPage
+    TabsPage
   ],
   providers: [
     StatusBar,
@@ -79,11 +77,11 @@ class CameraMock extends Camera {
     File,
     FileChooser,
     FilePath, 
-  //{provide:Camera, useClass:CameraMock},
+  {provide:Camera, useClass:CameraMock},
     Geolocation,
     NativeGeocoder,
     GooglePlus,
-    Camera,
+    //Camera,
     AngularFireModule,
     AngularFireDatabaseModule,
     AngularFireDatabase,
@@ -91,6 +89,7 @@ class CameraMock extends Camera {
     Badge,
     Firebase,
     UsernameValidator
+
   ]
 })
 export class AppModule {}

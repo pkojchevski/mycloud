@@ -49,9 +49,9 @@ exports.PushTriggerComments = functions.database.ref('/comments/{commentsId}').o
      var tokens = [];
      processtokens(rawtokens).then((processedtokens) => {
          for(var token of processedtokens) {
-            //    if(token.uid !== comments.uid) {
+            if(token.uid !== comments.uid) {
                  tokens.push(token.devtoken);
-            //  }
+             }
          }
         if(tokens.length !== 0) {
         var payload = {
