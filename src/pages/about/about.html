@@ -20,16 +20,18 @@
 
 <ion-content padding>
 <ion-list>
-    <ion-item-sliding  *ngFor='let img of images'>
+    <ion-item-sliding  *ngFor='let img of images |async'>
     <ion-item>
       <ion-thumbnail item-start>
         <ion-badge *ngIf='(newCommentId == img?.picuid)' color='danger'>N</ion-badge>
         <img src="{{img?.imgUrl}}" #imageToView (tap)="onClick(imageToView)">
       </ion-thumbnail>
+      <div (tap) = "commentImg(img)">
         <h2>{{img?.displayName}}</h2>
         <h4>{{img?.createdAt}}</h4>
         <h4>{{img?.title}}</h4>
         <h4>{{img?.place}}</h4>
+      </div>
     </ion-item>
     <ion-item-options side="right">
       <button ion-button icon-only color='primary' (tap)='commentImg(img)'>

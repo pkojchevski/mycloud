@@ -29,13 +29,22 @@ import firebase from 'firebase';
 
 import { CommentsProvider } from '../providers/comments/comments';
 
+import { AngularFireOfflineModule } from 'angularfire2-offline';
+// import { AngularFireOfflineDatabase } from 'angularfire2-offline/database';
+
 import { AngularFireDatabaseModule, AngularFireDatabase } from 'angularfire2/database';
 import { AngularFireModule } from 'angularfire2';
+
 
 import { IonicImageViewerModule } from 'ionic-img-viewer';
 import { Badge } from '@ionic-native/badge';
 import { Firebase } from '@ionic-native/firebase';
 import { UsernameValidator } from '../validators/username';
+import { ProgressBarComponent } from '../components/progress-bar';
+import { Facebook } from '@ionic-native/facebook';
+import { EditUserModalPage } from '../pages/edit-user-modal/edit-user-modal';
+import { Network } from '@ionic-native/network';
+
 
 class CameraMock extends Camera {
   getPicture(options){
@@ -52,13 +61,16 @@ class CameraMock extends Camera {
     AboutPage,
     ContactPage,
     HomePage,
-    TabsPage
+    TabsPage,
+    ProgressBarComponent,
+    EditUserModalPage
   ],
   imports: [
     BrowserModule,
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(config),
-    IonicImageViewerModule 
+    IonicImageViewerModule,
+    AngularFireOfflineModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -66,7 +78,8 @@ class CameraMock extends Camera {
     AboutPage,
     ContactPage,
     HomePage,
-    TabsPage
+    TabsPage,
+    EditUserModalPage
   ],
   providers: [
     StatusBar,
@@ -77,19 +90,22 @@ class CameraMock extends Camera {
     File,
     FileChooser,
     FilePath, 
-  {provide:Camera, useClass:CameraMock},
+ //{provide:Camera, useClass:CameraMock},
     Geolocation,
     NativeGeocoder,
     GooglePlus,
-    //Camera,
+   Camera,
     AngularFireModule,
     AngularFireDatabaseModule,
     AngularFireDatabase,
     CommentsProvider,
     Badge,
     Firebase,
-    UsernameValidator
-
+    UsernameValidator,
+    Facebook,
+    AngularFireOfflineModule,
+    Network
+    // AngularFireOfflineDatabase
   ]
 })
 export class AppModule {}

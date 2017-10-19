@@ -7,7 +7,9 @@
 </ion-header>
 
 <ion-content padding>
-  <img src="http://placehold.it/300x100">
+  <div class='loginImg'>
+    <img src="assets/img/mycloud.png" alt='here should be img'>
+</div>
   <form [formGroup]="signupForm" (submit)="signupUser()" novalidate>
     <ion-item>
       <ion-label stacked>Email</ion-label>

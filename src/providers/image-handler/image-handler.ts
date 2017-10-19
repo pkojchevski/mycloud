@@ -6,6 +6,8 @@ import firebase from 'firebase';
 import { Camera, CameraOptions } from "@ionic-native/camera";
 import { AuthProvider } from "../auth/auth";
 import { CommentsProvider } from "../comments/comments";
+import { Events } from 'ionic-angular';
+import { AngularFireOfflineDatabase } from 'angularfire2-offline';
 
 @Injectable()
 export class ImageHandlerProvider {
@@ -17,13 +19,14 @@ export class ImageHandlerProvider {
   commentsRef = firebase.database().ref('/comments');
 
   options: CameraOptions = {
-    quality:100,
+    quality:40,
     destinationType:this.camera.DestinationType.DATA_URL,
     sourceType: this.camera.PictureSourceType.PHOTOLIBRARY
   };
 
   constructor(public fileChooser: FileChooser, public camera: Camera, public authService: AuthProvider,
-  public commentsService: CommentsProvider) {
+              public commentsService: CommentsProvider, public events: Events,
+              public afoDatabase: AngularFireOfflineDatabase) {
     
   }
 
@@ -33,7 +36,7 @@ export class ImageHandlerProvider {
         //console.log('imageData:'+imageData);
         resolve(imageData);
       }).catch(err => {
-        console.log(err);
+        alert('err:'+JSON.stringify(err));
         reject(err);
       })
     })
@@ -57,20 +60,31 @@ export class ImageHandlerProvider {
     return promise;
   }
 
-
 addPicInStorage(imgStr) {
   var promise = new Promise((resolve, reject) => {
     let storageuid = firebase.auth().currentUser.uid + '_' + new Date().toISOString();
-    this.firestore.ref('/images').child(storageuid)
-    .putString(imgStr, 'base64')
+    let storeImageAsString = this.firestore.ref('/images').child(storageuid).putString(imgStr, 'base64');
+    storeImageAsString
+    // .on("state_changed", (snapshot) => {
+    //   var bytes = Math.trunc(snapshot['bytesTransferred']/snapshot['totalBytes']*100);
+    //   if(typeof bytes !== undefined && isFinite(bytes)) {
+    //     this.events.publish('progressBar', {'progress':bytes});
+    //   }
+    //  }, 
+    //  (err) => {
+    //    aert(err);
+    //  },
+    //  ():any => {
+    //     var url = storeImageAsString.snapshot.downloadURL;
+    //     console.log('url:'+url);
+    //     resolve({'url':url, 'storageuid':storageuid});
+    //  }
+    // )
     .then((snapshot) => {
        this.firestore.ref('/images').child(storageuid)
        .getDownloadURL().then(url => {
          resolve({'url':url, 'storageuid':storageuid});
        })
-  //      .    .on("state_changed", (snapshot) => {
-  //     console.log(snapshot); // progress of upload
-  //  })
        .catch((err) => {
        console.log('err:'+JSON.stringify(err));
        });
@@ -83,7 +97,6 @@ addPicInStorage(imgStr) {
 
 addPicUrlInDatabase(place, comment, imgUrl, user, storageuid) {
    var promise = new Promise((resolve, reject) => {
-     //console.log('addPicUrlInDatabase');
      let d = new Date();
      let newImgKey = firebase.database().ref('/images').push().key;
       firebase.database().ref('/images').
@@ -99,12 +112,6 @@ addPicUrlInDatabase(place, comment, imgUrl, user, storageuid) {
         photoUrl: user.photoUrl,
         title: comment
       })
-      // .then(()=> {
-      //   var img = { picuid:newImgKey};
-      //    this.commentsService.saveComment(img, comment).then(() => {
-      //      console.log('comment is saved');
-      //    })
-      // })
       .then(() => {
           this.incrNrOfPic().then(()=> {
             resolve(true);
@@ -112,14 +119,27 @@ addPicUrlInDatabase(place, comment, imgUrl, user, storageuid) {
       })
       .catch((err) => {
         reject(err);
-        //console.log('err:'+JSON.stringify(err));
       })
       })
    return promise;
 }
 
-getImagesFromUser() {
-   return firebase.database().ref('images/');
+getImagesFromUser(uid) {
+   return this.afoDatabase.list('/images', {
+     query: {
+       uid:uid
+     }
+   });
+}
+
+getImgFromUrl(url) {
+  return new Promise((resolve, reject) => {
+   this.imagesRef.orderByChild('imgUrl').equalTo(url).once('child_added', (snap) => {
+     resolve(snap.val());
+   }).catch((err) => {
+     reject(err);
+   })
+  })
 }
 
 getImageFromUid(picuid) {
@@ -131,78 +151,56 @@ getImageFromUid(picuid) {
 
 }
 
-// getAllImages() {
-//   return new Promise((resolve, reject) => {
-//     let images = [];
-//     this.imagesRef.on('value', (snap) => {
-//     // console.log('getAllImages snap.val():'+JSON.stringify(snap.val()));
-//           for(let key in snap.val()) {
-//            //console.log('key:'+key);
-//             firebase.database().ref('/images/'+key).on('value', (snapshot) => {
-//               if(snapshot.val() == null) {
-//                 images=[];
-//                 resolve(images);
-//               } else {
-//                 let img = snapshot.val();
-//                 this.authService.getUserFromUid(img.uid).then((user) => {
-//                   //console.log('user:'+JSON.stringify(user));
-//                    img.displayName = user['displayName'];
-//                    img.key = key;
-//                     images.push(img);
-//                     resolve(images);
-//                     //console.log('getAllImages:'+JSON.stringify(images));
-//                 }).catch((err) => {
-//                   alert('getAllImages about err:'+err);
-//                   reject(err);
-//                 })
-//               }
-//               });
-//           }
-//     })
-//   })
-// }
 getAllImages() {
-  return new Promise((resolve, reject) => {
-    let images = [];
-    this.imagesRef.once('value', (snap) => {
-      for(var key in snap.val()) {
-        images.push(snap.val()[key]);
-      }
-    }).then(() => {
-      resolve(images);
-    }).catch((err) => {
-      reject(err);
-    })
-  })
+   return this.afoDatabase.list('/images');
+  // return new Promise((resolve, reject) => {
+  //   let images = [];
+  //   this.imagesRef.once('value', (snap) => {
+  //     for(var key in snap.val()) {
+  //       images.push(snap.val()[key]);
+  //     }
+  //   }).then(() => {
+  //     resolve(images);
+  //   }).catch((err) => {
+  //     reject(err);
+  //   })
+  // })
 }
 
 getImagesOfCurrentUser() {
-  return new Promise((resolve, reject) => {
-    let images = [];
-    this.imagesRef.orderByChild('uid').equalTo(firebase.auth().currentUser.uid).once('value', (snap) => {
-        if(snap.val() == null) {
-          images = [];
-          resolve(images);
-        } else {
-          for(let key in snap.val()) {
-            let img = snap.val()[key];
-            img.key = key;
-            images.push(img);
-              resolve(images);
-            }         
-          }   
-    }).catch(err => {
-      reject(err);
-    })
+  return this.afoDatabase.list('/images', {
+    query: {
+      orderByChild: 'uid',
+      equalTo: firebase.auth().currentUser.uid
+    }
   })
+  // return new Promise((resolve, reject) => {
+  //   let images = [];
+  //   this.imagesRef.orderByChild('uid').equalTo(firebase.auth().currentUser.uid).once('value', (snap) => {
+  //       if(snap.val() == null) {
+  //         images = [];
+  //         resolve(images);
+  //       } else {
+  //         for(let key in snap.val()) {
+  //           let img = snap.val()[key];
+  //           img.key = key;
+  //           images.push(img);
+  //             resolve(images);
+  //           }         
+  //         }   
+  //   }).catch(err => {
+  //     reject(err);
+  //   })
+  // })
 }
 
 deleteImageFromStorage(img) {
   //console.log('deleteimagefromstorage');
   var promise = new Promise((resolve, reject) => {
     this.firestore.ref().child('/images/'+img.storageuid).delete().then(() => {
-    this.deleteImageFromDatabase(img);
-    resolve(true);
+    this.deleteImageFromDatabase(img).then(() => {
+      resolve(true);
+    })
   }).catch(err => {
     //console.log('err:'+JSON.stringify(err));
     reject(err);
@@ -213,46 +211,62 @@ return promise;
 
 deleteImageFromDatabase(img) {
   //console.log('deleteimagesfromdatabase');
- var promise = new Promise((resolve, reject) => {
-    firebase.database().ref('images/').orderByChild('imgUrl').equalTo(img.imgUrl)
-       .on('child_added', (snap) => {
-       snap.ref.remove().then(() => {
-        this.decrNrOfPic().then(() => {
-        //  console.log('were here');
-         resolve(true);
-        })
-        .catch((err) => {
+ return new Promise((resolve, reject) => {
+   this.imagesRef.child(img.picuid).remove().
+    // this.imagesRef.orderByChild('picuid').equalTo(img.picuid).on('value', (snap) => {
+    //   if(snap !== null) {
+    //     snap.ref.remove().
+    then(() => {
+          this.decrNrOfPic().then(() => {
+            resolve(true);
+        }).catch((err) => {
           alert(err);
-          reject(err);
-        });
-   }).catch((err) => {
-     alert(err);
-     reject(err);
-   })
- })
-})
- return promise;
+          reject('err:'+JSON.stringify(err));
+        })
+      }).catch(err => {
+        alert('err:'+JSON.stringify(err));
+        reject(err);
+      })
+    })
+      //  .once('value', (snap) => {
+//          console.log('snap:'+JSON.stringify(snap.val()));
+//           snap.ref.remove().then(() => {
+//             this.decrNrOfPic().then(() => {
+//             resolve(true);
+//             })
+//             .catch((err) => {
+//               alert(err);
+//               reject(err);
+//             });
+//         }).catch((err) => {
+//           alert(err);
+//           reject(err);
+//         })
+//  })
+
 }
 
-getnrOfPic() {
-  //console.log('getnrOfPic');
-    var promise = new Promise((resolve, reject) => {
-    firebase.database().ref('/userProfile').child(firebase.auth().currentUser.uid).
-      on('value', (snap) => {
-        //console.log('snap in getnrOfPic:'+JSON.stringify(snap.val()));
-        this.nrOfPic = snap.val().nrOfPic;
-        resolve({'number':this.nrOfPic})
-      })
-  })
-  return promise;
-}
+// getnrOfPic() {
+//   console.log('getnrOfPic');
+//     var promise = new Promise((resolve, reject) => {
+//     firebase.database().ref(`/userProfile/${firebase.auth().currentUser.uid}`).
+//       on('value', (snap) => {
+//         console.log('user snap:'+JSON.stringify(snap));
+//         this.nrOfPic = snap.val().nrOfPic;
+//         resolve({'nrOfPic':this.nrOfPic})
+//       })
+//   })
+//   return promise;
+// }
 
 incrNrOfPic() {
  // console.log('incnrOfPic');
    return new Promise((resolve, reject) => {
-    this.getnrOfPic().then((res) => {
+    // this.getnrOfPic().then((res) => {
+      firebase.database().ref('/userProfile').child(firebase.auth().currentUser.uid).once('value', (snap) => {
+        let nrOfPic = snap.val().nrOfPic;
       firebase.database().ref('/userProfile').child(firebase.auth().currentUser.uid).update({
-         nrOfPic : res['number'] + 1
+         nrOfPic : nrOfPic + 1
        }).then(() => {
          resolve(true);
        }).catch(err => {
@@ -269,11 +283,19 @@ incrNrOfPic() {
 decrNrOfPic() {
   //console.log('decnrOfPic');
   return new Promise((resolve, reject) => {
-    this.getnrOfPic().then((res) => {
+    // this.getnrOfPic().then((res) => {
+      firebase.database().ref('/userProfile').child(firebase.auth().currentUser.uid).once('value', (snap)=> {
+       //console.log('nrOfPic snap:'+JSON.stringify(snap.val()));
+        let nrOfPic = snap.val().nrOfPic;
        firebase.database().ref('/userProfile').child(firebase.auth().currentUser.uid).update({
-         nrOfPic : res['number'] - 1
+         nrOfPic : nrOfPic - 1
+       }).then(() => {
+        resolve(true);
        })
-       resolve(true);
+       .catch((err) => {
+         alert(err);
+         reject(err);
+       })
     }).catch((err) => {
     //   console.log('err:'+err);
        reject(err);
@@ -298,5 +320,7 @@ reverseString(str) {
     //Step 4. Return the reversed string
     return joinArray; // "olleh"
 }
+
+
 
 }

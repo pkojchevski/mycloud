@@ -45,10 +45,16 @@ usersRef = firebase.database().ref('/userProfile');
     })
   }
 
-  deleteComment(picuid) {
+  deleteComment(img) {
     return new Promise((resolve,reject) => {
-      this.commentsRef.child('picuid').equalTo(picuid).on('child_added', (snap) => {
-        snap.ref.remove().then()
+      this.commentsRef.orderByChild('picuid').equalTo(img.picuid).on('child_added', (snap) => {
+        if(snap !== null) {
+        snap.ref.remove().then(()=> {
+          resolve(true);
+        }).catch(err => {
+          reject(err);
+        })
+      }
     })
   })
 }

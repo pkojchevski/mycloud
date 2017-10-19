@@ -6,6 +6,7 @@ import { TabsPage } from "../tabs/tabs";
 import { AuthProvider } from "../../providers/auth/auth";
 import { GooglePlus } from '@ionic-native/google-plus';
 import firebase from 'firebase';
+import { Facebook } from '@ionic-native/facebook'
 
 @IonicPage()
 @Component({
@@ -19,7 +20,7 @@ export class LoginPage {
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public fb: FormBuilder,
   public authService: AuthProvider, public alertCtrl: AlertController, public loaderCtrl: LoadingController,
-  public googleplus: GooglePlus) {
+  public googleplus: GooglePlus, public facebook: Facebook ) {
     this.loginForm = fb.group({
       email: ['', Validators.compose([Validators.required, 
              EmailValidator.isValid])],
@@ -71,10 +72,14 @@ export class LoginPage {
    }).catch((err) => {
      alert("err:"+JSON.stringify(err));
    })
-
   }
 
   loginFacebook() {
-    //console.log('to be done!');
+    this.authService.facebookLogin().then(() => {
+      this.navCtrl.setRoot(TabsPage);
+    }).catch(err => {
+      alert('err:'+JSON.stringify(err));
+    })
   }
+
 }

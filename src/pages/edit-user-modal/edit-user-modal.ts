@@ -3,7 +3,7 @@ import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angul
 
 
 
-@IonicPage()
+// @IonicPage()
 @Component({
   selector: 'page-edit-user-modal',
   templateUrl: 'edit-user-modal.html',

@@ -42,14 +42,15 @@ exports.PushTrigger = functions.database.ref('/images/{imageId}').onWrite((event
    })
 })
 
-exports.PushTriggerComments = functions.database.ref('/comments/{commentsId}').onWrite((event) => {
+exports.PushTriggerComments = functions.database.ref('/comments/{commentId}').onWrite((event) => {
     comments = event.data.val();
+    console.log('comments:'+JSON.stringify(comments));
     admin.database().ref('/pushtokens').orderByChild('uid').once('value', (snap) => { 
      var rawtokens  = snap.val();
      var tokens = [];
      processtokens(rawtokens).then((processedtokens) => {
          for(var token of processedtokens) {
-            if(token.uid !== comments.uid) {
+            if(token.uid !== comments.useruid) {
                  tokens.push(token.devtoken);
              }
          }

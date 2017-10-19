@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import firebase from 'firebase';
 import { GooglePlus } from '@ionic-native/google-plus';
+import { Facebook } from '@ionic-native/facebook';
+import { AfoListObservable, AngularFireOfflineDatabase } from 'angularfire2-offline/database';
+
 
 @Injectable()
 export class AuthProvider {
@@ -8,13 +11,13 @@ export class AuthProvider {
    currentUser: any;
    userProfile: any;
    usersRef = firebase.database().ref('/userProfile');
-  constructor(public googleplus: GooglePlus) {
+  constructor(public googleplus: GooglePlus, public facebook: Facebook,
+              public afoDatabase: AngularFireOfflineDatabase) {
     firebase.auth().onAuthStateChanged((user) => {
        if(user) {
          this.currentUser = user;
-          //console.log('uid:'+this.currentUser.uid);
          this.userProfile = firebase.database().ref(`/userProfile/${user.uid}`);
-         //console.log('user in auth constructor:'+JSON.stringify(this.currentUser));
+         //console.log('user in auth constructor:'+JSON.stringify(this.userProfile));
        }
        console.log('no user in auth constructor');
     })
@@ -58,13 +61,14 @@ logoutUser() {
 }
 
 getUserData() {
-      console.log('userProfile in GetUserData:'+JSON.stringify(this.userProfile));
+  //console.log('userProfile in GetUserData:'+JSON.stringify(this.userProfile)); 
   return this.userProfile;
 }
 
 
 getAllUsers() {
-  return firebase.database().ref('/userProfile').orderByChild('uid');
+  // return firebase.database().ref('/userProfile').orderByChild('uid');
+  return this.afoDatabase.list('/userProfile');
 }
 
 uploadUserData(imgUrl) {
@@ -73,7 +77,7 @@ uploadUserData(imgUrl) {
        photoUrl: imgUrl
      }).then(() => {
         resolve({'success':true});
-        console.log('currentUser:'+JSON.stringify(firebase.auth().currentUser));
+        //console.log('currentUser:'+JSON.stringify(firebase.auth().currentUser));
      }).catch((err) => {
        reject(err);
      })
@@ -92,10 +96,10 @@ googleLogin() {
           .then((response) => {
             let res = response;
             this.usersRef.orderByChild('email').equalTo(res.email).on('value', (snap) => {
-              console.log('snap:'+JSON.stringify(snap.val()));
+              //console.log('snap:'+JSON.stringify(snap.val()));
               if(snap.val() !== null) {
                 resolve(true);
-                console.log('email exists');
+                //console.log('email exists');
               } else {
                 firebase.database().ref('/userProfile').child(response.uid).set({
                   email: response.email,
@@ -119,6 +123,47 @@ googleLogin() {
           })
 })      
   return promise;
+}
+
+
+facebookLogin(): Promise<any> {
+  return new Promise((resolve, reject)=> {
+    this.facebook.login(['email']).then( response => {
+      const facebookCredential = firebase.auth.FacebookAuthProvider
+        .credential(response.authResponse.accessToken);
+        //console.log('facebookCredential:'+JSON.stringify(facebookCredential));
+      firebase.auth().signInWithCredential(facebookCredential)
+        .then(success => { 
+          this.usersRef.child(success.uid).once('value', (snap) => {
+              if(snap.val() !== null) {
+                resolve(true); // user already exists
+              } else {  //first time login
+                this.usersRef.child(success.uid).set({
+                  email: success.email,
+                  displayName: success.displayName,
+                  photoUrl: success.photoURL,
+                  nrOfPic:0,
+                  username: this.reverseString(success.displayName)
+                }).then(() => {
+                  resolve(true);
+                }).catch((err) => {
+                  alert('err:'+JSON.stringify(err));
+                  reject(err);
+                }) 
+              }
+          }).catch((err) => {
+            alert('err:'+JSON.stringify(err));
+            reject(err);
+          })
+        }).catch((error) => {
+       //console.log(error);
+       reject(error);
+      });
+    }).catch((error) => {
+     // console.log(error);
+      reject(error);
+     });
+  })
 }
 
 resetPassword(email: string) {

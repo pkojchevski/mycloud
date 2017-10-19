@@ -1,5 +1,5 @@
 import { Component, NgZone } from '@angular/core';
-import { NavController, AlertController, LoadingController, ModalController, Platform } from 'ionic-angular';
+import { NavController, AlertController, LoadingController, ModalController, Platform, Events } from 'ionic-angular';
 import { AuthProvider } from "../../providers/auth/auth";
 import { ImageHandlerProvider } from "../../providers/image-handler/image-handler";
 
@@ -19,6 +19,11 @@ import { Firebase } from '@ionic-native/firebase';
 
 import 'rxjs/add/operator/map'
 import { Badge } from '@ionic-native/badge';
+import { CommentsProvider } from '../../providers/comments/comments';
+
+import { AfoListObservable, AngularFireOfflineDatabase } from 'angularfire2-offline/database';
+
+import { Network } from '@ionic-native/network';
 
 
 // declare var FCMPlugin: any;
@@ -40,51 +45,60 @@ export class HomePage {
   user: any;
   imgUrl;
   img;
-  images = [];
+  images:AfoListObservable<any>;
   userProfile;
   numberOfPic;
   location = '';
   firetokens = firebase.database().ref('/pushtokens');
   firemsg = firebase.database().ref('/messages');
   notificationToken;
+  storageProgress = 0;
+  running = false;
 
   constructor(public navCtrl: NavController, private authService: AuthProvider, 
               public imgHandler: ImageHandlerProvider, public zone:NgZone, public alertCtrl: AlertController,
               public loadingCtrl: LoadingController, public geolocation: Geolocation, public geocoder: NativeGeocoder,
               public modalCtrl: ModalController, public platform: Platform,  public imageViewerCtrl: ImageViewerController,
               public statusBar: StatusBar, public splashScreen: SplashScreen,
-              public afd: AngularFireDatabase, public firebaseplugin: Firebase, public badge: Badge) {
+              public afd: AngularFireDatabase, public firebaseplugin: Firebase, public badge: Badge,
+              public events: Events, public commentsProvider: CommentsProvider,
+              public afoDatabase: AngularFireOfflineDatabase, public network: Network) {
+
     this.geolocate();
+    this.events.subscribe('progressBar', (progress) => {
+      // console.log("progress:"+JSON.stringify(progress));
+      this.storageProgress = progress.progress;
+   });
     this.platform.ready().then(() => {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
       this.subscribeForNotifications();
     })
-    console.log('currentUser:'+firebase.auth().currentUser);
+    //console.log('currentUser:'+firebase.auth().currentUser);
   }
 
-
+  
 
   subscribeForNotifications() {
     this.firebaseplugin.onTokenRefresh().subscribe((token) => {
         this.storeToken(token);
-        console.log('refresh token');
+        //console.log('refresh token');
     }, (error) => {
-      console.log('err:'+error);
+      alert('err:'+error);
     });
   }
 
  storeToken(token) {
    this.firetokens.orderByChild('devtoken').equalTo(token).on('value', (snap) => {
-     console.log('snap.val():'+JSON.stringify(snap.val()));
+    //  console.log('snap.val():'+JSON.stringify(snap.val()));
      if(snap.val() === null) {
       this.afd.list(this.firetokens).push({
         uid: firebase.auth().currentUser.uid,
         devtoken: token
       }).then(() => {
-        console.log('token is saved');
+        //console.log('token is saved');
       }).catch((err) => {
-        console.log('token not stored');
+        //console.log('token not stored');
       })
      }
    })
@@ -92,7 +106,7 @@ export class HomePage {
  }
 
  ionSelected() {
-   console.log('home page is selected');
+   //console.log('home page is selected');
  }
 
 
@@ -114,21 +128,32 @@ export class HomePage {
         });
   }
 
-  ionViewDidLoad() {
-
+  getNetworkStatus() {
+    let ntwstatus = false;
+    if(this.network.type === 'none') {
+        ntwstatus = true;
+    } else {
+       ntwstatus = false;
+    }
+    return ntwstatus;
   }
 
+
   ionViewWillEnter() {
-    let loading = this.loadingCtrl.create();
+  let loading = this.loadingCtrl.create();
     loading.present();
    this.authService.getUserData().on('value', snapshot => {
      this.user = snapshot.val();
    });
-   this.imgHandler.getImagesOfCurrentUser().then((images:any) => {
-    this.images = [];
-     this.images = images;
-     loading.dismiss();
-   });
+   this.images = this.imgHandler.getImagesOfCurrentUser();
+   
+   loading.dismiss();
+   console.log('images:'+this.images);
+  //  this.imgHandler.getImagesOfCurrentUser().then((images:any) => {
+  //   this.images = [];
+  //    this.images = images;
+  //    loading.dismiss();
+  //  });
    
   }
 
@@ -148,8 +173,9 @@ logout() {
 }
 
 addPic() {
-   let loading = this.loadingCtrl.create();
-   loading.present();
+  if(!this.getNetworkStatus()) {
+    let loading = this.loadingCtrl.create();
+    loading.present();
    this.imgHandler.getUserPic().then((img: any) => {
      this.zone.run(() => {
        this.imgUrl = "data:image/jpeg;base64,"+img;
@@ -167,17 +193,21 @@ addPic() {
              role:'cancel',
              handler: data => {
                comment = data.comment;
-               this.imgHandler.addPicUrlInDatabase(this.location, comment, obj['url'], this.user, obj['storageuid']).then(() => {
-                    loading.dismiss().then(()=> {
-                      this.imgHandler.getImagesOfCurrentUser().then((images:any) => {
-                        this.images = [];
-                         this.images = images;
-                       })
+               this.imgHandler.addPicUrlInDatabase(this.location, comment, obj['url'], this.user, obj['storageuid'])
+               .then(() => {
+                 console.log('write here');
+                     loading.dismiss().then(()=> {
+                      this.imgHandler.getImgFromUrl(obj['url']).then((img) => {
+                        //console.log('img:'+JSON.stringify(img));
+                         // this.images.push(img);
+                        }).catch((err) => {
+                          this.alertErr(err);
+                        })
                   })
               }).catch(err => {
-                loading.dismiss().then(() => {
+                 loading.dismiss().then(() => {
                     this.alertErr(err);
-                }) 
+                 }) 
               })
              }
            }
@@ -196,6 +226,9 @@ addPic() {
          this.alertErr(err);
        })
         })
+      } else {
+        alert('No Internet connection');
+            }
 }  
 
 alertErr(err) {
@@ -213,19 +246,17 @@ alertErr(err) {
 
 
 deleteImg(img) {
-  this.imgHandler.deleteImageFromStorage(img).then(() => {
-      this.imgHandler.deleteImageFromDatabase(img).then(()=> {
-          var index = this.images.indexOf(img);
-      //    console.log('index:'+index);
-          this.images.splice(index, 1);
-      })
-      .catch((err)=> {
-        //  console.log('err:'+JSON.stringify(err));
-      })
-  })
-  .catch((err)=> {
-     // console.log('err:'+JSON.stringify(err));
-  })
+  // var index = this.images.indexOf(img);
+  // this.images.splice(index, 1);
+  // this.imgHandler.deleteImageFromStorage(img).then(() => {
+  //   this.commentsProvider.deleteComment(img).then(() => {
+  //   })
+  // })
+  // .catch((err)=> {
+  //    alert(err);
+  // })
+  // console.log('img.picuid:'+img.picuid);
+  this.images.remove(img.picuid);
   
 }
 
