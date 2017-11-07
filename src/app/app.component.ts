@@ -20,12 +20,13 @@ export class MyApp {
     platform.ready().then(() => {
       statusBar.styleDefault();
       splashScreen.hide();
+      console.log('here')
     });
     firebase.initializeApp(config);
     AngularFireModule.initializeApp(config)
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if(user) {
-        //  console.log('user:'+JSON.stringify(user));
+        //console.log('user:'+JSON.stringify(user));
          this.rootPage = TabsPage;
          unsubscribe();
        } else {
@@ -36,4 +37,5 @@ export class MyApp {
 
     
   }
+
 }

@@ -11,14 +11,14 @@
   <div class='profile-image'>
       <img src='{{imgUrl}}' class='userImage' (tap)='changeUserImg()'>
     </div>
-    <div text-center>
-      <button ion-button round outline (tap)='chooseimage()'>Choose Image</button>
+    <br>
+    <div class="fileUpload btn btn-primary">
+      <span>Add PIC</span>
+      <input type="file" class="upload" />
     </div>
+    <br>
     <div [hidden]='!moveon' text-center>
       <button ion-button round outline (tap)='proceed()'>Skip this step</button>
-    </div>
-    <div [hidden]='moveon' text-center>
-      <button ion-button round outline (tap)='updateproceed()'>Upload & proceed</button>
     </div>
 
 </ion-content>

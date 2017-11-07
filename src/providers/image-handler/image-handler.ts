@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { File } from '@ionic-native/file';
-import { FileChooser } from '@ionic-native/file-chooser';
-import { FilePath } from '@ionic-native/file-path';
+// import { File } from '@ionic-native/file';
+// import { FileChooser } from '@ionic-native/file-chooser';
+// import { FilePath } from '@ionic-native/file-path';
 import firebase from 'firebase';
-import { Camera, CameraOptions } from "@ionic-native/camera";
+// import { Camera, CameraOptions } from "@ionic-native/camera";
 import { AuthProvider } from "../auth/auth";
 import { CommentsProvider } from "../comments/comments";
 import { Events } from 'ionic-angular';
-import { AngularFireOfflineDatabase } from 'angularfire2-offline';
+import { AngularFireOfflineDatabase, AfoListObservable } from 'angularfire2-offline/database';
+import { AngularFireAuth } from 'angularfire2/auth';
 
 @Injectable()
 export class ImageHandlerProvider {
@@ -17,37 +18,41 @@ export class ImageHandlerProvider {
   nrOfPic: number;
   imagesRef = firebase.database().ref('/images');
   commentsRef = firebase.database().ref('/comments');
+  imagesStorage = firebase.storage().ref('/images');
+  currentUser;
 
-  options: CameraOptions = {
-    quality:40,
-    destinationType:this.camera.DestinationType.DATA_URL,
-    sourceType: this.camera.PictureSourceType.PHOTOLIBRARY
-  };
+  // options: CameraOptions = {
+  //   quality:40,
+  //   destinationType:this.camera.DestinationType.DATA_URL,
+  //   sourceType: this.camera.PictureSourceType.PHOTOLIBRARY
+  // };
 
-  constructor(public fileChooser: FileChooser, public camera: Camera, public authService: AuthProvider,
-              public commentsService: CommentsProvider, public events: Events,
-              public afoDatabase: AngularFireOfflineDatabase) {
-    
-  }
-
-  getUserPic() {
-    var promise = new Promise((resolve, reject) => {
-      this.camera.getPicture(this.options).then(imageData => {
-        //console.log('imageData:'+imageData);
-        resolve(imageData);
-      }).catch(err => {
-        alert('err:'+JSON.stringify(err));
-        reject(err);
-      })
+  constructor(public authService: AuthProvider,
+              public commentsService: CommentsProvider, public events: Events, 
+              public afdb: AngularFireOfflineDatabase,
+              public afAuth: AngularFireAuth) {
+     
+    this.afAuth.authState.subscribe(res => {
+      // console.log('res:'+JSON.stringify(res));
+      this.currentUser = res;
     })
-    return promise;
   }
 
-  addUserPicInStorage(imgStr) {
+  // getCurrentUserData() {
+  //   return this.afdb.list('/users', {
+  //       query: {
+  //           orderBy:'uid',
+  //           equalTo: this.currentUser
+  //       }
+  //     })
+  //   }
+  
+
+  addUserPicInStorage(file) {
     // console.log('imgStr:'+imgStr);
     var promise = new Promise((resolve, reject) => {
       this.firestore.ref('/profileImages').child(firebase.auth().currentUser.uid).
-       putString(imgStr, 'base64').then((snapshot) => {
+       put(file).then((snapshot) => {
          this.firestore.ref('/profileImages').child(firebase.auth().currentUser.uid).getDownloadURL().then((url) => {
          resolve(url);
          }).catch(err => {
@@ -60,11 +65,11 @@ export class ImageHandlerProvider {
     return promise;
   }
 
-addPicInStorage(imgStr) {
-  var promise = new Promise((resolve, reject) => {
+addPicInStorage(file) {
+  return new Promise((resolve, reject) => {
     let storageuid = firebase.auth().currentUser.uid + '_' + new Date().toISOString();
-    let storeImageAsString = this.firestore.ref('/images').child(storageuid).putString(imgStr, 'base64');
-    storeImageAsString
+    let uploadFile = this.firestore.ref('/images').child(storageuid).put(file);
+    uploadFile
     // .on("state_changed", (snapshot) => {
     //   var bytes = Math.trunc(snapshot['bytesTransferred']/snapshot['totalBytes']*100);
     //   if(typeof bytes !== undefined && isFinite(bytes)) {
@@ -92,7 +97,6 @@ addPicInStorage(imgStr) {
        console.log('err:'+JSON.stringify(err));
     });
   })
-  return promise;
 }
 
 addPicUrlInDatabase(place, comment, imgUrl, user, storageuid) {
@@ -124,13 +128,15 @@ addPicUrlInDatabase(place, comment, imgUrl, user, storageuid) {
    return promise;
 }
 
-getImagesFromUser(uid) {
-   return this.afoDatabase.list('/images', {
-     query: {
-       uid:uid
-     }
-   });
-}
+
+
+// getImagesFromUser(uid) {
+//   //  return this.afoDatabase.list('/images', {
+//   //    query: {
+//   //      uid:uid
+//   //    }
+//   //  });
+// }
 
 getImgFromUrl(url) {
   return new Promise((resolve, reject) => {
@@ -152,7 +158,7 @@ getImageFromUid(picuid) {
 }
 
 getAllImages() {
-   return this.afoDatabase.list('/images');
+   return this.afdb.list('/images');
   // return new Promise((resolve, reject) => {
   //   let images = [];
   //   this.imagesRef.once('value', (snap) => {
@@ -168,30 +174,12 @@ getAllImages() {
 }
 
 getImagesOfCurrentUser() {
-  return this.afoDatabase.list('/images', {
+ return this.afdb.list('/images', {
     query: {
       orderByChild: 'uid',
       equalTo: firebase.auth().currentUser.uid
     }
   })
-  // return new Promise((resolve, reject) => {
-  //   let images = [];
-  //   this.imagesRef.orderByChild('uid').equalTo(firebase.auth().currentUser.uid).once('value', (snap) => {
-  //       if(snap.val() == null) {
-  //         images = [];
-  //         resolve(images);
-  //       } else {
-  //         for(let key in snap.val()) {
-  //           let img = snap.val()[key];
-  //           img.key = key;
-  //           images.push(img);
-  //             resolve(images);
-  //           }         
-  //         }   
-  //   }).catch(err => {
-  //     reject(err);
-  //   })
-  // })
 }
 
 deleteImageFromStorage(img) {

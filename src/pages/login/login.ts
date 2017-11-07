@@ -4,9 +4,9 @@ import { FormGroup, Validators, FormBuilder } from "@angular/forms";
 import { EmailValidator } from "../../validators/email";
 import { TabsPage } from "../tabs/tabs";
 import { AuthProvider } from "../../providers/auth/auth";
-import { GooglePlus } from '@ionic-native/google-plus';
+// import { GooglePlus } from '@ionic-native/google-plus';
 import firebase from 'firebase';
-import { Facebook } from '@ionic-native/facebook'
+// import { Facebook } from '@ionic-native/facebook'
 
 @IonicPage()
 @Component({
@@ -19,8 +19,7 @@ export class LoginPage {
   loader;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public fb: FormBuilder,
-  public authService: AuthProvider, public alertCtrl: AlertController, public loaderCtrl: LoadingController,
-  public googleplus: GooglePlus, public facebook: Facebook ) {
+  public authService: AuthProvider, public alertCtrl: AlertController, public loaderCtrl: LoadingController) {
     this.loginForm = fb.group({
       email: ['', Validators.compose([Validators.required, 
              EmailValidator.isValid])],
@@ -66,20 +65,31 @@ export class LoginPage {
      this.navCtrl.push('ResetPasswordPage');
   }
 
-  loginGooglePlus() {
-   this.authService.googleLogin().then(() => {
-     this.navCtrl.setRoot(TabsPage);
-   }).catch((err) => {
-     alert("err:"+JSON.stringify(err));
-   })
-  }
-
-  loginFacebook() {
-    this.authService.facebookLogin().then(() => {
-      this.navCtrl.setRoot(TabsPage);
+  loginWithGoogle() {
+    let loader = this.loaderCtrl.create();
+    loader.present();
+    // console.log('goglelogin')
+    this.authService.loginWithGoogle().then(data => {
+      // console.log('data:'+JSON.stringify(data));
+         this.authService.addNewUserFire(data.user).then(() => {
+           this.navCtrl.setRoot(TabsPage);
+           loader.dismiss();
+         })
     }).catch(err => {
       alert('err:'+JSON.stringify(err));
+      loader.dismiss();
     })
   }
+
+  loginWithFacebook5() {
+    this.authService.loginWithFacebook1()
+    // .then(data => {
+    //   console.log('data:'+JSON.stringify(data));
+    //   this.authService.addNewUserFire(data.user).then(() => {
+    //     this.navCtrl.setRoot(TabsPage);
+    //   })
+    // })
+  }
+
 
 }

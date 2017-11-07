@@ -5,8 +5,9 @@ import { AuthProvider } from "../../providers/auth/auth";
 import firebase from 'firebase';
 import { ImageHandlerProvider } from "../../providers/image-handler/image-handler";
 import { ImageViewerController } from "ionic-img-viewer";
+import { FirebaseListObservable } from 'angularfire2/database';
+import { AfoListObservable } from 'angularfire2-offline';
 
-import { AngularFireOfflineDatabase, AfoListObservable } from 'angularfire2-offline/database';
 
 @Component({
   selector: 'page-about',
@@ -20,8 +21,7 @@ export class AboutPage {
   constructor(public navCtrl: NavController, public navParams: NavParams, public authService: AuthProvider, 
         public alertCtrl: AlertController, public imgHandler: ImageHandlerProvider, 
         public loadingCtrl: LoadingController,
-        public imageViewerCtrl: ImageViewerController, public event: Events, public zone: NgZone,
-        public afoDatabase: AngularFireOfflineDatabase) {
+        public imageViewerCtrl: ImageViewerController, public event: Events, public zone: NgZone) {
           this.event.subscribe('new_comment', (data) => {
             //console.log('data:'+JSON.stringify(data));
             this.newCommentId = data.message;
@@ -38,7 +38,7 @@ export class AboutPage {
 logout() {
   this.authService.logoutUser().then(() => {
    // console.log('user logout');
-    this.navCtrl.push('LoginPage');
+    this.navCtrl.parent.parent.setRoot('LoginPage');
   }).catch((err) => {
     //console.log('err:'+err);
   })
@@ -54,12 +54,8 @@ ionViewDidLoad() {
 ionViewWillEnter() {
   let loader = this.loadingCtrl.create();
   loader.present();
-  this.images = this.imgHandler.getAllImages();
-//   this.imgHandler.getAllImages().then((images) => {
-//   this.images = images;
-//   loader.dismiss();
-//  });
-loader.dismiss();
+    this.images = this.imgHandler.getAllImages();
+  loader.dismiss();
 
 }
 

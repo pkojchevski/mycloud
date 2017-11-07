@@ -1,20 +1,23 @@
+import {AfoListObservable} from 'angularfire2-offline';
 import { Component, ViewChild } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { AuthProvider } from "../../providers/auth/auth";
 import { Content } from 'ionic-angular';
 
-import {AfoListObservable, AfoObjectObservable, AngularFireOfflineDatabase } from 'angularfire2-offline/database';
+import { FirebaseListObservable } from 'angularfire2/database';
 
 @Component({
   selector: 'page-contact',
   templateUrl: 'contact.html'
 })
 export class ContactPage {
+  
   users: AfoListObservable<any>;
+
   @ViewChild(Content) content: Content;
 
   constructor(public navCtrl: NavController, public authService: AuthProvider) {
-
+    this.users = this.authService.getAllUsers();
   }
 
   ionSelected() {
@@ -45,7 +48,7 @@ export class ContactPage {
   logout() {
     this.authService.logoutUser().then(() => {
       console.log('user logout');
-      this.navCtrl.push('LoginPage');
+      this.navCtrl.parent.parent.setRoot('LoginPage');
     }).catch((err) => {
       console.log('err:'+err);
     })

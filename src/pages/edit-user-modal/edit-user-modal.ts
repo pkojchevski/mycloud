@@ -28,4 +28,6 @@ export class EditUserModalPage {
    this.navCtrl.push('AddUserPicPage');
   }
 
+  
+
 }
