@@ -42,7 +42,8 @@ import { EditUserModalPage } from '../pages/edit-user-modal/edit-user-modal';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { MessagingProvider } from '../providers/messaging/messaging';
 // import { Network } from '@ionic-native/network';
-
+//import { BrowserModule } from '@angular/platform-browser';
+import { Ng2ImgToolsModule } from 'ng2-img-tools';
 
 // class CameraMock extends Camera {
 //   getPicture(options){
@@ -68,7 +69,8 @@ import { MessagingProvider } from '../providers/messaging/messaging';
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(config),
     IonicImageViewerModule,
-    AngularFireOfflineModule
+    AngularFireOfflineModule,
+    Ng2ImgToolsModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

@@ -20,7 +20,7 @@
 
 <ion-content padding>
 <ion-list>
-    <ion-item-sliding  *ngFor='let img of images |async'>
+    <ion-item-sliding *ngFor='let img of images |async'>
     <ion-item>
       <ion-thumbnail item-start>
         <ion-badge *ngIf='(newCommentId == img?.picuid)' color='danger'>N</ion-badge>

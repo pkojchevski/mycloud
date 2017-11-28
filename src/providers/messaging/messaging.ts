@@ -8,6 +8,8 @@ import { AngularFireAuth } from 'angularfire2/auth';
 
 import 'rxjs/add/operator/take';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Events } from 'ionic-angular';
+
 
 @Injectable()
 export class MessagingProvider {
@@ -16,7 +18,7 @@ export class MessagingProvider {
 
   constructor(private authService: AuthProvider, 
               private afdb: AngularFireDatabase,
-              private afAuth: AngularFireAuth) {
+              private afAuth: AngularFireAuth, private events : Events) {
     
   }
 
@@ -44,10 +46,20 @@ export class MessagingProvider {
   }
 
   receiveMessage() {
-    this.messaging.onMessage(payload => {
-       console.log('Message received:'+payload);
-       this.currentMessage.next(payload);
-    })
+      this.messaging.onMessage(payload => {
+        console.log('Message received:'+JSON.stringify(payload));
+        this.currentMessage.next(payload);
+        if(payload['data'].imageid) {
+          this.events.publish('imagesIncr', payload['data'].imageid);
+        }
+        if(payload['data'].imgcommentid) {
+          console.log('publish comments');
+          this.events.publish('commentsIncr', payload['data'].imgcommentid);
+        }
+        if(payload['data'].userid) {
+          this.events.publish('usersIncr', payload['data'].userid);
+        } 
+     })
   }
 
 }

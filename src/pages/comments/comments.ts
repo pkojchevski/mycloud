@@ -1,5 +1,5 @@
 import { Component, NgZone, ViewChild } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Events } from 'ionic-angular';
 
 import { CommentsProvider } from '../../providers/comments/comments';
 import { AuthProvider } from "../../providers/auth/auth";
@@ -23,9 +23,11 @@ img;
 comments:any =[];
 comment;
 user;
+newCommentId;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public commentsService: CommentsProvider,
-           public authService: AuthProvider, public imgHandler: ImageHandlerProvider, private zone: NgZone) {
+           public authService: AuthProvider, public imgHandler: ImageHandlerProvider, private zone: NgZone, 
+           public events: Events) {
     this.img = navParams.get('image');
     this.comments = [];
     this.commentsService.getAndCompleteCommentsForImage(this.img).then((res) => {
@@ -35,6 +37,7 @@ user;
     this.authService.getUserData().on('value', snapshot => {
       this.user = snapshot.val();
     });
+
   }
 
 

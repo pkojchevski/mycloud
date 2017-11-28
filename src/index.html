@@ -19,7 +19,7 @@
   <!-- un-comment this code to enable service worker -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
+      navigator.serviceWorker.register('./firebase-messaging-sw.js')
         .then(() => {console.log('service-worker installed');
           // reg.addEventListener('updatefound', () => {
           //   var worker = reg.installing;

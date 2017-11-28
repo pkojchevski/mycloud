@@ -13,6 +13,7 @@ import { AfoListObservable } from 'angularfire2-offline';
   selector: 'page-about',
   templateUrl: 'about.html'
 })
+
 export class AboutPage { 
   images: AfoListObservable<any[]>;
   firestore = firebase.storage();
@@ -21,15 +22,14 @@ export class AboutPage {
   constructor(public navCtrl: NavController, public navParams: NavParams, public authService: AuthProvider, 
         public alertCtrl: AlertController, public imgHandler: ImageHandlerProvider, 
         public loadingCtrl: LoadingController,
-        public imageViewerCtrl: ImageViewerController, public event: Events, public zone: NgZone) {
-          this.event.subscribe('new_comment', (data) => {
-            //console.log('data:'+JSON.stringify(data));
-            this.newCommentId = data.message;
-            //console.log('picuid:'+this.newCommentId);
-          })
+        public imageViewerCtrl: ImageViewerController, public events: Events, public zone: NgZone) {
+         
+       this.events.subscribe('commentsIncr', (imgcommentid) => {
+            this.newCommentId = imgcommentid;
+            console.log('in subscribe newCommentId:'+this.newCommentId);
+        })
+    
   }
-
-
 
   ionSelected() {
     //console.log('about page is selected');
