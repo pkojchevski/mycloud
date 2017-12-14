@@ -8,7 +8,11 @@ import { AuthProvider } from "../auth/auth";
 import { CommentsProvider } from "../comments/comments";
 import { Events } from 'ionic-angular';
 import { AngularFireOfflineDatabase, AfoListObservable } from 'angularfire2-offline/database';
+
 import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFireDatabase } from 'angularfire2/database';
+
+import "rxjs/add/operator/map";
 
 @Injectable()
 export class ImageHandlerProvider {
@@ -29,7 +33,7 @@ export class ImageHandlerProvider {
 
   constructor(public authService: AuthProvider,
               public commentsService: CommentsProvider, public events: Events, 
-              public afdb: AngularFireOfflineDatabase,
+              public afodb: AngularFireOfflineDatabase, public afiredb: AngularFireDatabase,
               public afAuth: AngularFireAuth) {
      
     this.afAuth.authState.subscribe(res => {
@@ -136,6 +140,8 @@ addPicUrlInDatabase(place, comment, imgUrl, user, storageuid) {
 //   //      uid:uid
 //   //    }
 //   //  });
+
+
 // }
 
 getImgFromUrl(url) {
@@ -158,7 +164,8 @@ getImageFromUid(picuid) {
 }
 
 getAllImages() {
-   return this.afdb.list('/images');
+   return this.afodb.list('/images');
+  }
   // return new Promise((resolve, reject) => {
   //   let images = [];
   //   this.imagesRef.once('value', (snap) => {
@@ -174,12 +181,12 @@ getAllImages() {
 }
 
 getImagesOfCurrentUser() {
- return this.afdb.list('/images', {
+   return this.afodb.list('/images', {
     query: {
       orderByChild: 'uid',
       equalTo: firebase.auth().currentUser.uid
     }
-  })
+})
 }
 
 deleteImageFromStorage(img) {

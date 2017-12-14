@@ -83,12 +83,12 @@ export class LoginPage {
 
   loginWithFacebook5() {
     this.authService.loginWithFacebook1()
-    // .then(data => {
-    //   console.log('data:'+JSON.stringify(data));
-    //   this.authService.addNewUserFire(data.user).then(() => {
-    //     this.navCtrl.setRoot(TabsPage);
-    //   })
-    // })
+    .then(data => {
+      console.log('data:'+JSON.stringify(data));
+      this.authService.addNewUserFire(data.user).then(() => {
+        this.navCtrl.setRoot(TabsPage);
+      })
+    })
   }
 
 

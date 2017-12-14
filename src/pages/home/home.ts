@@ -28,14 +28,14 @@ import { AfoListObservable, AngularFireOfflineDatabase } from 'angularfire2-offl
 // import { Network } from '@ionic-native/network';
 // import {googlemaps} from 'googlemaps'
 //import { google } from 'google-maps';
-import { Ng2ImgToolsService } from 'ng2-img-tools';
+// import { Ng2ImgToolsService } from 'ng2-img-tools';
 
 declare var google: any;
 
 export class NotificationModel {
   public body: string;
   public title: string;
-  public tap: boolean
+  public tap: boolean;
 }
 
 @Component({
@@ -69,18 +69,13 @@ export class HomePage {
               public imgHandler: ImageHandlerProvider, public zone:NgZone, public alertCtrl: AlertController,
               public loadingCtrl: LoadingController, 
               public modalCtrl: ModalController, public platform: Platform,  public imageViewerCtrl: ImageViewerController,
-              public afodb: AngularFireOfflineDatabase, 
+              public afodb: AngularFireOfflineDatabase, public afiredb: AngularFireDatabase,
               public msgService: MessagingProvider,
-              public events: Events, public commentsProvider: CommentsProvider, 
-              private ng2ImgToolsService: Ng2ImgToolsService) {
+              public events: Events, public commentsProvider: CommentsProvider) {
                 this.getGeoLocation();
                 this.msgService.receiveMessage();
+                
   }
-
- ionSelected() {
-   //console.log('home page is selected');
- }
-
 
  public getGeoLocation() {
   if (navigator.geolocation) {
@@ -112,23 +107,20 @@ export class HomePage {
 }
 
 
-
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad');
-  }
-
   ionViewWillEnter() {
-    console.log('ionViewWillEnter');
   let loading = this.loadingCtrl.create();
     loading.present();
-
+  var imagesReceived = false;
    this.authService.getUserData().on('value', snapshot => {
      this.user = snapshot.val();
    });
-  this.images = this.imgHandler.getImagesOfCurrentUser();
-   loading.dismiss(); 
-   
 
+   var network = navigator.onLine;
+
+  this.images = this.imgHandler.getImagesOfCurrentUser();
+
+
+   loading.dismiss(); 
   }
 
   onClick(imageToView) {
@@ -146,27 +138,32 @@ logout() {
 
 choosePic(event) {
   return new Promise((resolve, reject) => {
-    this.ng2ImgToolsService.resize(event.target.files[0], 800, 800)
-    .subscribe(image => {
-      this.file = image;
-    }, error => {
-      console.log('error:'+error);
-    })
-    console.log('file:'+this.file);
-    if(typeof this.file !== 'undefined') {
-      resolve();
-    } else {
-      reject();
+      if(event.target.files.length > 0) {
+        this.file = event.target.files[0];
+      //   this.ng2ImgToolsService.resize([this.file], 500, 500)
+      //   .subscribe(result => {
+      //     console.info('result:'+result);
+      //     resolve(result);
+      //   }, error => {
+      //     console.log('error:'+error);
+      //     reject(error);
+      //   })
+       }
+      resolve(this.file);
+      });
+
     }
-  })
-}
+
+
 
 
 addPic(event) {
+  console.log('navigator.onLine:'+navigator.onLine);
+  if(navigator.onLine) {
     let loading = this.loadingCtrl.create();
     loading.present();
-    this.choosePic(event).then(()=> {
-      this.imgHandler.addPicInStorage(this.file).then((obj) => {
+    this.choosePic(event).then((result)=> {
+      this.imgHandler.addPicInStorage(result).then((obj) => {
          var comment;
           var alert = this.alertCtrl.create({
            buttons:[
@@ -180,14 +177,13 @@ addPic(event) {
                        loading.dismiss().then(()=> {
                         this.imgHandler.getImgFromUrl(obj['url']).then((img) => {
                           console.log('here');
-                         this.ionViewDidLoad();
                           }).catch((err) => {
-                            this.alertErr(err);
+                            this.alertErr("err4:"+err);
                           })
                     })
                 }).catch(err => {
                    loading.dismiss().then(() => {
-                      this.alertErr(err);
+                      this.alertErr("err3:"+err);
                    }) 
                 })
                }
@@ -204,11 +200,18 @@ addPic(event) {
             alert.present();
           }) 
          }).catch(err => {
-           this.alertErr(err);
+           loading.dismiss();
+           this.alertErr("e2:"+err);
+           console.log('err2:'+err);
          })
     }).catch(error => {
-      this.alertErr(error);
+      this.alertErr("er1:"+error);
+      loading.dismiss();
+      console.log('err1:'+error);
     })
+  } else {
+    alert('Network is not available!');
+  }
 }  
 
 alertErr(err) {
@@ -226,9 +229,13 @@ alertErr(err) {
 
 
 deleteImg(img) {
-  return this.images.remove(img).then(()=> {
-    this.imgHandler.decrNrOfPic().then(()=> {
-      this.commentsProvider.deleteComment(img).then();
+  return this.images.remove(img).then(() => {
+    // console.log('image is deleted from storage');
+    firebase.storage().ref().child('/images/'+img.storageuid).delete().then(() => {
+      this.imgHandler.decrNrOfPic().then(()=> {
+        this.commentsProvider.deleteComment(img).then(() => {
+          // console.log('img:'+JSON.stringify(img));
+        })
     }).catch(err=> {
       alert('error:'+JSON.stringify(err));
     })
@@ -247,6 +254,7 @@ deleteImg(img) {
   // console.log('img.picuid:'+img.picuid);
   // this.images.remove(img.picuid);
   
+})
 }
 
 openModal() {

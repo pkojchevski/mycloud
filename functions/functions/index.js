@@ -62,10 +62,8 @@ exports.pushOnNewImage = functions.database.ref('/images/{imageId}').onCreate(ev
     admin.database()
            .ref(`fcmTokens/`)
             .once('value', snap => {
-              console.log('snap.val():'+JSON.stringify(snap.val()));
               let alltokens = snap.val();
               for(let val in alltokens) {
-                  console.log('val:'+val);
                  if(val !== userId) {
                     console.log('alltokens.val:'+alltokens[val]);
                     tokens.push(alltokens[val]);
@@ -91,6 +89,7 @@ exports.pushOnNewImage = functions.database.ref('/images/{imageId}').onCreate(ev
 exports.pushOnNewComments = functions.database.ref('/comments/{commentId}').onCreate(event => {
     const comment = event.data.val();
     const userId = comment.useruid;
+    var tokens = [];
 //   console.log('this.image:'+JSON.stringify(image));
 //   console.log('userId:'+image.uid);
     const payload = {
@@ -104,9 +103,18 @@ exports.pushOnNewComments = functions.database.ref('/comments/{commentId}').onCr
        }
     };
     admin.database()
-           .ref(`/fcmTokens/${userId}`)
+           .ref('fcmTokens/')
            .once('value')
-           .then(token => token.val())
+           .then(snap => {
+           let alltokens = snap.val();
+           for(let val in alltokens) {
+              if(val !== userId) {
+                 console.log('alltokens.val:'+alltokens[val]);
+                 tokens.push(alltokens[val]);
+              }
+           }
+           return tokens;
+        })
            .then(userFcmToken => {
                 console.log('userFcmToken:'+JSON.stringify(userFcmToken));
                 return admin.messaging().sendToDevice(userFcmToken, payload);

@@ -1,3 +1,6 @@
+// importScripts('/idb.js');
+// importScripts('/utility.js');
+
 // var CACHE_STATIC_NAME = 'static_v7';
 // var CACHE_DYNAMIC_NAME = 'dynamic_v1';
 
@@ -53,7 +56,21 @@
 // })
 
 // self.addEventListener('fetch', event => {
-//   if(event.request.url !== 'http://localhost:8100/ionic-lab') {
+//   console.log('urls:'+event.request.url);
+//   if(event.request.url.indexOf('images') > -1) {
+//     console.log('urls:'+event.request.url);
+//      event.respondWith(fetch(event.request).then((res) => {
+//        var clonedRes = res.clone();
+//        clonedRes.json().then(data => {
+//          for(var key in data) {
+//            console.log('data[key]:'+data[key]);
+//             writeData('allimages', data[key])
+//          }
+//        })
+//        return res;
+//      }))
+//   }
+//   else if(event.request.url !== 'http://localhost:8100/ionic-lab') {
 //     event.respondWith(
 //       caches.match(event.request).then(response => {
 //         if (response) {
@@ -65,7 +82,7 @@
 //                return res;
 //              })
 //         }).catch(err => {
-
+//           console.log('err during fetching');
 //         })
 //       }
 //     })
@@ -74,7 +91,7 @@
 // })
 
 
- importScripts('./build/sw-toolbox.js');
+importScripts('./build/sw-toolbox.js');
 
 importScripts('https://www.gstatic.com/firebasejs/3.9.0/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/3.9.0/firebase-messaging.js');
