@@ -35,7 +35,7 @@
         "@ionic-native/splash-screen": "3.12.1",
         "@ionic-native/status-bar": "3.12.1",
         "@ionic/storage": "2.0.1",
-        "angular2-indexeddb": "^1.2.1",
+        "angular2-indexeddb": "^1.2.2",
         "angularfire2": "^4.0.0-rc0",
         "angularfire2-offline": "^4.3.1",
         "blueimp-canvas-to-blob": "^3.14.0",
